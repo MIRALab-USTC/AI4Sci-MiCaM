@@ -1,11 +1,13 @@
-from arguments import parse_arguments
-import torch
-from model.mol_graph import MolGraph
 import os.path as path
-from model.mydataclass import Paths
-from merging_operation_learning import merging_operation_learning
-from motif_vocab_construction import motif_vocab_construction
+
+import torch
+
+from arguments import parse_arguments
 from make_training_data import make_trainig_data
+from merging_operation_learning import merging_operation_learning
+from model.mol_graph import MolGraph
+from model.mydataclass import Paths
+from motif_vocab_construction import motif_vocab_construction
 
 if __name__ == "__main__":
 

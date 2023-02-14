@@ -1,17 +1,16 @@
-import torch, random
-from arguments import parse_arguments
 from typing import List
-import os.path as path
-import torch.nn as nn
 
-from tensorboardX import SummaryWriter
-
-from guacamol.assess_distribution_learning import assess_distribution_learning
-from guacamol.distribution_matching_generator import DistributionMatchingGenerator
-from guacamol.distribution_learning_benchmark import ValidityBenchmark, UniquenessBenchmark, NoveltyBenchmark, KLDivBenchmark
+from guacamol.distribution_learning_benchmark import (KLDivBenchmark,
+                                                      NoveltyBenchmark,
+                                                      UniquenessBenchmark,
+                                                      ValidityBenchmark)
+from guacamol.distribution_matching_generator import \
+    DistributionMatchingGenerator
 from guacamol.frechet_benchmark import FrechetBenchmark
 from guacamol.utils.chemistry import is_valid
+
 from model.mydataclass import BenchmarkResults
+
 
 class QuickBenchGenerator(DistributionMatchingGenerator):
 
@@ -27,14 +26,10 @@ class QuickBenchGenerator(DistributionMatchingGenerator):
 
         iter = 0
         while number_unique_molecules < number_samples and number_already_sampled < max_samples:
-            print(f"iter {iter}: ")
             iter += 1
             remaining_to_sample = number_samples - number_unique_molecules
-
             samples = generator.generate(number_samples=remaining_to_sample)
-            
             number_already_sampled += remaining_to_sample
-
             for m in samples:
                 if is_valid(m):
                     if m not in unique_molecules:

@@ -55,12 +55,12 @@ def motif_vocab_construction(
     atom_list = [x for (x, _) in vocab.keys() if x not in MolGraph.OPERATIONS]
     atom_list.sort()
     new_vocab = []
-    whole_list = atom_list + MolGraph.OPERATIONS
+    full_list = atom_list + MolGraph.OPERATIONS
     for (x, y), value in vocab.items():
-        assert x in whole_list, print(f"Error: ({x}, {y}).")
+        assert x in full_list
         new_vocab.append((x, y, value))
         
-    index_dict = dict(zip( whole_list, range(len(whole_list))))
+    index_dict = dict(zip(full_list, range(len(full_list))))
     sorted_vocab = sorted(new_vocab, key=lambda x: index_dict[x[0]])
     with open(vocab_path, "w") as f:
         for (x, y, _) in sorted_vocab:

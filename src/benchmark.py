@@ -1,9 +1,11 @@
-import torch, random
-from arguments import parse_arguments
-from model.MiCaM_VAE import MiCaM
-from model.benchmarks import QuickBenchGenerator
-from torch.utils.tensorboard import SummaryWriter
+import random
+
+import torch
 from guacamol.assess_distribution_learning import assess_distribution_learning
+
+from arguments import parse_arguments
+from model.benchmarks import QuickBenchGenerator
+from model.MiCaM_VAE import MiCaM
 from model.mydataclass import ModelParams, Paths
 
 if __name__ == '__main__':
@@ -17,7 +19,7 @@ if __name__ == '__main__':
     torch.cuda.set_device(args.cuda)
 
     
-    generator = MiCaM.load_generator(model_params, paths, load_log_model=args.load_log_model)
+    generator = MiCaM.load_generator(model_params, paths)
     generator = QuickBenchGenerator(generator, number_samples=args.num_sample)
     
     with open(paths.generate_path, "w") as f:
@@ -28,5 +30,5 @@ if __name__ == '__main__':
         generator,
         chembl_training_file=paths.train_path,
         json_output_file=paths.benchmark_path,
-        )
+    )
     

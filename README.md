@@ -13,6 +13,19 @@ This is the code of paper **De Novo Molecular Generation via Connection-aware Mo
 
 ## Workflow
 
+Put the dataset under the `./data` directory. Name the training set and avlid set as `train.smiles` and `valid.smiles`, respectively. An example of the working directory is as following.
+```
+AI4Sci-MiCaM
+├── data
+│   └── QM9
+│       ├── train.smiles
+│       └── valid.smiles
+├── output/
+├── preprocess/
+├── src/
+└── README.md
+```
+
 ### 1. Mining connection-aware motifs
 
 It consists of two phases: merging operation learning and motif vocabulary construction.

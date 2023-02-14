@@ -22,10 +22,6 @@ class Vocab(object):
 
 class MotifVocab(object):
 
-    '''
-    1) motif_idx + conn_idx -> idx in keys
-    2) node idx of all keys
-    '''
     def __init__(self, pair_list: List[Tuple[str, str]]):
         self.motif_smiles_list = [motif for _, motif in pair_list]
         self.motif_vmap = dict(zip(self.motif_smiles_list, range(len(self.motif_smiles_list))))

@@ -1,19 +1,21 @@
-from dataclasses import dataclass
-from email.generator import Generator
-from torch_geometric.data import Data, Batch
-from torch import Tensor, LongTensor
-from typing import Dict, List, Tuple, Any, Optional
-from argparse import Namespace
+import logging
 import os
 import os.path as path
+from argparse import Namespace
+from dataclasses import dataclass
 from datetime import datetime
-from guacamol.distribution_learning_benchmark import DistributionLearningBenchmarkResult
+from email.generator import Generator
+from typing import Any, Dict, List, Optional, Tuple
+
+from guacamol.distribution_learning_benchmark import \
+    DistributionLearningBenchmarkResult
 from tensorboardX import SummaryWriter
-import logging
+from torch import LongTensor, Tensor
+from torch_geometric.data import Batch, Data
+
 
 @dataclass
 class train_data:
-    """ The training data of each step. """
     graph: Data
     query_atom: int
     cyclize_cand: List[int]
@@ -21,7 +23,6 @@ class train_data:
 
 @dataclass
 class mol_train_data:
-    """ The preproposed training data of one molecule. """
     mol_graph: Data
     props: Tensor
     start_label: int
@@ -30,8 +31,6 @@ class mol_train_data:
 
 @dataclass
 class batch_train_data:
-    """ The preproposed training datao of a batch of molecules. """
-    # batch_smiles: List[str]
     batch_mols_graphs: Batch
     batch_props: Tensor
     batch_start_labels: LongTensor
@@ -73,7 +72,6 @@ class Paths:
     model_path: Optional[str] = None
 
     def __init__(self, args: Namespace):
-
         self.data_dir = args.data_dir
         self.preprocess_dir = args.preprocess_dir
         self.output_dir = args.output_dir
@@ -108,7 +106,6 @@ class Paths:
 
 @dataclass
 class ModelParams:
-    """ Hyperparameters of the model. """
     atom_embed_size: List[int]
     edge_embed_size: int
     motif_embed_size: int
@@ -116,9 +113,9 @@ class ModelParams:
     latent_size: int
     depth: int
     motif_depth: int
-    dropout: int
     virtual: bool
     pooling: str
+    dropout: float
     num_props: int
     vocab_processed_path: str
 
@@ -146,14 +143,13 @@ class ModelParams:
         latent_size             |       {self.latent_size}
         depth                   |       {self.depth}
         motif_depth             |       {self.motif_depth}
-        dropout                 |       {self.dropout}
         virtual_node            |       {self.virtual}
         pooling                 |       {self.pooling}
+        dropout                 |       {self.dropout}
         """
     
 @dataclass
 class TrainingParams:
-    """ Hyperparameters for model training. """
     lr: float
     lr_anneal_iter: int
     lr_anneal_rate: float

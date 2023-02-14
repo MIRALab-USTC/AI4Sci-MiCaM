@@ -6,7 +6,6 @@ from datetime import datetime
 from functools import partial
 from typing import List, Tuple
 
-import rdkit.Chem as Chem
 import torch
 from tqdm import tqdm
 

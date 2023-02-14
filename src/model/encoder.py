@@ -1,13 +1,10 @@
+from typing import List, Tuple
+
 import torch
 import torch.nn as nn
-import rdkit.Chem as Chem
-import torch.nn.functional as F
-from model.mol_graph import MolGraph, MAX_NUM_ATOMS, NUM_EDGE_TYPES, ATOM_FEATURES
-import networkx as nx
-from typing import Tuple, List
 from torch_geometric.data import Data
-from torch_geometric.nn import GATConv
-from torch_scatter import scatter_mean
+
+from model.mol_graph import ATOM_FEATURES
 
 class Atom_Embedding(nn.Module):
     def __init__(self,
@@ -29,35 +26,12 @@ class Atom_Embedding(nn.Module):
     def reset_parameters(self) -> None:
         for i in range(len(ATOM_FEATURES)):
             nn.init.xavier_normal_(getattr(self, f"f_embed_{i}").weight)
-
-class Motif_Embedding(nn.Module):
-    def __init__(self,
-        motif_embed_size: List[int],
-        dropout: float,
-    ) -> None:
-        super().__init__()
-        self.f_embed1 = nn.Embedding(MolGraph.MOTIF_VOCAB.size()[0], motif_embed_size[1], max_norm=512, scale_grad_by_freq=True)
-        self.f_embed2 = nn.Embedding(MolGraph.MOTIF_VOCAB.size()[1], motif_embed_size[1], max_norm=512, scale_grad_by_freq=True)
-        self.dropout = nn.Dropout(dropout)
-        self.idx = MolGraph.MOTIF_VOCAB.get_idx()
-        self.reset_parameters()
-
-    def forward(self) -> torch.Tensor:
-        if not self.idx.is_cuda:
-            self.idx = self.idx.cuda()
-        weight1 = self.dropout(self.f_embed1.weight)
-        weight2 = self.dropout(self.f_embed2.weight) + weight1[self.idx]
-        return (self.idx, weight1, weight2)
-    
-    def reset_parameters(self) -> None:
-        nn.init.xavier_normal_(self.f_embed1.weight)
-        nn.init.zeros_(self.f_embed2.weight)
         
 class Encoder(nn.Module):
     def __init__(self,
         atom_embedding: Atom_Embedding,
         edge_embedding: nn.Embedding,
-        GNN: torch.nn,
+        GNN: nn.Module,
     ) -> None:
         super(Encoder, self).__init__()
 

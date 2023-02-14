@@ -1,23 +1,14 @@
-from abc import abstractmethod
-from tracemalloc import start
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from model.mol_graph import MolGraph, MAX_NUM_ATOMS, BOND_LIST, BOND_VOCAB
-from model.encoder import Atom_Embedding, Motif_Embedding, Encoder
+from model.mol_graph import MolGraph, BOND_VOCAB
+from model.encoder import Encoder
 import networkx as nx
-from model.utils import smiles2mol, get_accuracy, get_accuracy_bin, mol_graph2smiles, networkx2data, sample_from_distribution
-from typing import Dict, List, Tuple, Any, Optional, Union
+from model.utils import get_accuracy, mol_graph2smiles, networkx2data, sample_from_distribution
+from typing import Dict, List, Tuple, Optional, Union
 from model.vocab import MotifVocab
-import logging
-import multiprocessing as mp
 from torch_geometric.data import Data, Batch
 from model.nn import MLP
-import rdkit.Chem as Chem
 from model.mydataclass import batch_train_data, Decoder_Output
-from collections import defaultdict
-
-GET_MAX_STEP = 0
 
 class DecoderState(object):
     def __init__(
@@ -87,7 +78,8 @@ class DecoderState(object):
         motif_graph = nx.convert_node_labels_to_integers(motif_graph, len(self.current_graph))
         
         for i, conn in enumerate(new_conn_list):
-            new_conn_list[i] = conn = conn + len(self.current_graph)
+            conn = conn + len(self.current_graph)
+            new_conn_list[i] = conn
             self.atoms_step_dict[conn] = self.decode_step
 
         self.connections_list = self.connections_list + new_conn_list
@@ -110,7 +102,6 @@ class DecoderState(object):
         if self.trace:
             self.trace.append(smiles)
         return (smiles, self.trace) if return_trace else smiles
-
 
 class Decoder(nn.Module):
     def __init__(self,
@@ -216,7 +207,6 @@ class Decoder(nn.Module):
             query_topk_acc = query_topk_acc,
         )
     
-
     def save_motifs_embed(self, file):
         motif_node_embed, motif_graph_embed = torch.Tensor([]), torch.Tensor([])
         motif_graphs_list = self.motif_graphs.to_data_list()
@@ -230,14 +220,9 @@ class Decoder(nn.Module):
         motif_embed = (motif_node_embed, motif_graph_embed)
         torch.save(motif_embed, file)
     
-    def load_motifs_embed(self, file, cuda_: bool=True):
+    def load_motifs_embed(self, file):
         self.motif_node_embed, self.motif_graph_embed = torch.load(file)
-        if cuda_:
-            self.motif_node_embed, self.motif_graph_embed = self.motif_node_embed.cuda(), self.motif_graph_embed.cuda()
-            self.motif_node_embed.share_memory_()
-            self.motif_graph_embed.share_memory_()
-        else:
-            self.motif_node_embed, self.motif_graph_embed = self.motif_node_embed.cpu(), self.motif_graph_embed.cpu()
+        self.motif_node_embed, self.motif_graph_embed = self.motif_node_embed.cpu(), self.motif_graph_embed.cpu()
 
     def pick_fisrt_motifs_for_batch(
         self,
@@ -307,16 +292,10 @@ class Decoder(nn.Module):
         temperature: float,
     ) -> List[DecoderState]:
 
-        global GET_MAX_STEP
-        for step in range(1, max_decode_step + 1):
+        for _ in range(1, max_decode_step + 1):
             nonterm_states: List[DecoderState] = [decoder_state for decoder_state in decoder_states if decoder_state.non_terminal]
-            print(f"step {step}: {len(nonterm_states)} non-term mols")
 
-            if step == max_decode_step:
-                GET_MAX_STEP += len(nonterm_states)
-                print(f"GET_MAX_STEP: {GET_MAX_STEP}")
             if len(nonterm_states) == 0:
-                print(f"GET_MAX_STEP: {GET_MAX_STEP}")
                 break
 
             batch_graph_data = Batch.from_data_list([decoder_state.current_graph_data for decoder_state in nonterm_states]).to(self.device)
@@ -346,8 +325,8 @@ class Decoder(nn.Module):
         self,
         latent_reprs: Union[torch.Tensor, List[torch.Tensor]],
         max_decode_step: int = 20,
-        greedy: bool = False,
-        beam_top: int = 100,
+        greedy: bool = True,
+        beam_top: int = 1,
         temperature: float = 1.0,
         return_trace: bool = False
     ) -> Union[List[str], List[Tuple[str, List[str]]]]:

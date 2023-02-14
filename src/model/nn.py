@@ -1,9 +1,10 @@
+from typing import Optional
+
 import torch
 import torch.nn as nn
-from torch_geometric.nn import MessagePassing, GATConv, Sequential, GlobalAttention, GINEConv, global_mean_pool, global_add_pool
-from torch_geometric.transforms import VirtualNode
-from typing import Optional, Union, List, Any, Dict
 import torch.nn.functional as F
+from torch_geometric.nn import GINEConv, global_add_pool, global_mean_pool
+
 
 class MLP(nn.Module):
     def __init__(
@@ -124,8 +125,6 @@ class GIN_virtual(nn.Module):
             dropout = dropout,
         )
 
-        self.batch_norm = nn.BatchNorm1d(hidden_channels)
-
     def forward(self, x, edge_index, edge_attr, batch):
         if self.virtual:
             v = torch.zeros(batch[-1].item() + 1, dtype=torch.long).to(x.device)
@@ -149,7 +148,6 @@ class GIN_virtual(nn.Module):
             if self.virtual:
                 virtual_tmp = virtual_layer(global_add_pool(x_list[-1], batch) + virtual_embed)
                 virtual_embed = virtual_embed + virtual_tmp if self.residual else virtual_tmp
-
 
         join_vecs = torch.cat(x_list, -1)
         nodes_reps = self.out_layer(join_vecs)
