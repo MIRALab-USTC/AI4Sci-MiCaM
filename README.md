@@ -94,6 +94,52 @@ python src/train.py \
     --cuda 0
 ```
 
+```
+python src/train.py \
+    --job_name train_zinc \
+    --dataset zinc \
+    --num_operations 500 \
+    --batch_size 500 \
+    --depth 15 \
+    --motif_depth 6 \
+    --latent_size 256 \
+    --hidden_size 256 \
+    --dropout 0.1 \
+    --steps 60000 \
+    --lr 0.005 \
+    --lr_anneal_iter 100 \
+    --lr_anneal_rate 0.995 \
+    --beta_warmup 10000 \
+    --beta_min 0.001 \
+    --beta_max 0.7 \
+    --beta_anneal_period 100000 \
+    --prop_weight 0.2 \
+    --cuda 0
+```
+
+```
+python src/train.py \
+    --job_name train_guacamol \
+    --dataset guacamol \
+    --num_operations 500 \
+    --batch_size 500 \
+    --depth 15 \
+    --motif_depth 6 \
+    --latent_size 256 \
+    --hidden_size 256 \
+    --dropout 0.1 \
+    --steps 60000 \
+    --lr 0.001 \
+    --lr_anneal_iter 100 \
+    --lr_anneal_rate 0.995 \
+    --beta_warmup 10000 \
+    --beta_min 0.001 \
+    --beta_max 0.6 \
+    --beta_anneal_period 100000 \
+    --prop_weight 0.2 \
+    --cuda 0
+```
+
 Benchmarking will be automatically conduct during the training process.
 
 ## Citation
