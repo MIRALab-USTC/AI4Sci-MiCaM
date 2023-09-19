@@ -27,7 +27,7 @@ if __name__ == "__main__":
     MolGraph.load_operations(paths.operation_path, args.num_operations)
 
     if not path.exists(paths.vocab_path):
-        mols, vocab = motif_vocab_construction(
+        motif_vocab_construction(
             train_path = paths.train_path,
             vocab_path = paths.vocab_path,
             operation_path = paths.operation_path,

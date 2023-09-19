@@ -222,7 +222,7 @@ class Decoder(nn.Module):
     
     def load_motifs_embed(self, file):
         self.motif_node_embed, self.motif_graph_embed = torch.load(file)
-        self.motif_node_embed, self.motif_graph_embed = self.motif_node_embed.cpu(), self.motif_graph_embed.cpu()
+        self.motif_node_embed, self.motif_graph_embed = self.motif_node_embed.cuda(), self.motif_graph_embed.cuda()
 
     def pick_fisrt_motifs_for_batch(
         self,
